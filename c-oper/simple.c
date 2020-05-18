@@ -1,5 +1,5 @@
 #define YAKS 1
-#ifdef SANDWICH
+#ifdef YEKS
 pickles
 #else
 sandwiches
