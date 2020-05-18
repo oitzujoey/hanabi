@@ -18,26 +18,6 @@ def rec_proc(data):
             command = ''
         spacing = com.index(command) - 1
 
-        if command == "define":
-            if len(args) == 2:
-                consts[args[1]] = None
-            else:
-                consts[args[1]] = args[2]
-            del data[d]
-            d -= 1
-
-        if command == "include":
-            print(args)
-            f_name = '/usr/include/'+args[-1][1:-1] if args[-1][0] == '<' else './'+args[-1][1:-1]
-            if os.path.exists(f_name):
-                with open(f_name) as s:
-                    del data[d]
-
-                    for ss in rec_proc(s.readlines()):
-                        data.insert(d,ss)
-            else:
-                del data[d]
-
         if command.startswith("if") and in_f == 0:
             in_type     = command
             from_l      = d
@@ -45,6 +25,28 @@ def rec_proc(data):
             in_f        = 1
             const      = ' '.join(com[spacing+2:])
 
+        if in_f == 0:
+
+            if command == "define":
+                if len(args) == 2:
+                    consts[args[1]] = None
+                else:
+                    consts[args[1]] = args[2]
+                del data[d]
+                d -= 1
+
+            if command == "include":
+                print(args)
+                f_name = '/usr/include/'+args[-1][1:-1] if args[-1][0] == '<' else './'+args[-1][1:-1]
+                if os.path.exists(f_name):
+                    with open(f_name) as s:
+                        del data[d]
+
+                        for ss in rec_proc(s.readlines()):
+                            data.insert(d,ss)
+                else:
+                    del data[d]
+            
         if command.startswith("else") and in_f == 1 and stop_at == spacing:
             data.insert(d,'#' + ''.join([' ' for t in range(spacing)]) + 'endif')
             data[d+1] = '#' + ''.join([' ' for t in range(spacing)]) + (
@@ -59,7 +61,6 @@ def rec_proc(data):
             if stop_at == spacing:
                 if in_type == 'ifdef':
                     if const in consts.keys():
-                        print("it's in there!")
                         del data[d]
                         del data[from_l]
                         d = from_l
@@ -80,9 +81,12 @@ def rec_proc(data):
                         in_f    = 0
                         in_type = ''
 
+
         """
-        print(da)
+                print(da)
         print('...')
+        time.sleep(0.5)
+        
         pprint.pprint(data)
         print('\n')
         """

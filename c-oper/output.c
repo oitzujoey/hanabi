@@ -3,6 +3,8 @@
 __END_DECLS
 
 #endif
+#ifdef __LDBL_COMPAT
+#endif
 #if __USE_FORTIFY_LEVEL > 0 && defined __fortify_function
 #endif
 #ifdef __USE_EXTERN_INLINES
@@ -81,6 +83,7 @@ extern int fileno (FILE *__stream) __THROW __wur;
 #ifdef	__USE_POSIX
 
 
+#include <bits/sys_errlist.h>
    all the necessary functionality.  */
    should not be used directly.  The `strerror' function provides
    are available on this system.  Even if available, these variables
@@ -116,13 +119,15 @@ extern int fseeko64 (FILE *__stream, __off64_t __off, int __whence);
 
 #endif
 # endif
+#  define fsetpos fsetpos64
+#  define fgetpos fgetpos64
 # else
 		       (FILE *__stream, const fpos_t *__pos), fsetpos64);
 extern int __REDIRECT (fsetpos,
 				 fpos_t *__restrict __pos), fgetpos64);
 extern int __REDIRECT (fgetpos, (FILE *__restrict __stream,
 # ifdef __REDIRECT
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K#endifextern int fsetpos (FILE *__stream, const fpos_t *__pos);
+#if defined __USE_XOPEN || defined __USE_XOPEN2K8#endifextern int fsetpos (FILE *__stream, const fpos_t *__pos);
    marked with __THROW.  */
    This function is a possible cancellation point and therefore not
 
@@ -137,6 +142,8 @@ extern int fgetpos (FILE *__restrict __stream, fpos_t *__restrict __pos);
 #endif
 # endif
 #  endif
+#   define ftello ftello64
+#   define fseeko fseeko64
 #  else
 extern __off64_t __REDIRECT (ftello, (FILE *__stream), ftello64);
 		       fseeko64);
@@ -328,6 +335,7 @@ extern int fputc_unlocked (int __c, FILE *__stream);
 /* Faster version when locking is not necessary.
 #ifdef __USE_MISC
 
+#define putc(_ch, _fp) _IO_putc (_ch, _fp)
    so we always do the optimization for it.  */
 /* The C standard explicitly says this can be a macro,
 
@@ -367,6 +375,7 @@ extern int getc_unlocked (FILE *__stream);
 /* These are defined in POSIX.1:1996.
 #ifdef __USE_POSIX199506
 
+#define getc(_fp) _IO_getc (_fp)
    optimization for it.  */
 /* The C standard explicitly says this is a macro, so we always do the
 
@@ -387,6 +396,9 @@ extern int fgetc (FILE *__stream);
 #endif /* Use ISO C9x.  */
 # endif
 #  endif
+#   define vsscanf __isoc99_vsscanf
+#   define vscanf __isoc99_vscanf
+#   define vfscanf __isoc99_vfscanf
 			     _G_va_list __arg) __THROW;
 			     const char *__restrict __format,
 extern int __isoc99_vsscanf (const char *__restrict __s,
@@ -440,6 +452,9 @@ extern int vfscanf (FILE *__restrict __s, const char *__restrict __format,
 
 #endif
 # endif
+#  define sscanf __isoc99_sscanf
+#  define scanf __isoc99_scanf
+#  define fscanf __isoc99_fscanf
 			    const char *__restrict __format, ...) __THROW;
 extern int __isoc99_sscanf (const char *__restrict __s,
 extern int __isoc99_scanf (const char *__restrict __format, ...) __wur;
@@ -596,6 +611,8 @@ extern FILE *fopen64 (const char *__restrict __filename,
 #ifdef __USE_LARGEFILE64
 #endif
 # endif
+#  define freopen freopen64
+#  define fopen fopen64
 # else
   __wur;
 				   FILE *__restrict __stream), freopen64)
@@ -605,7 +622,7 @@ extern FILE *__REDIRECT (freopen, (const char *__restrict __filename,
 				 const char *__restrict __modes), fopen64)
 extern FILE *__REDIRECT (fopen, (const char *__restrict __filename,
 # ifdef __REDIRECT
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K#endif		      FILE *__restrict __stream) __wur;
+#if defined __USE_XOPEN || defined __USE_XOPEN2K8#endif		      FILE *__restrict __stream) __wur;
 		      const char *__restrict __modes,
 extern FILE *freopen (const char *__restrict __filename,
    marked with __THROW.  */
@@ -681,10 +698,11 @@ extern FILE *tmpfile64 (void) __wur;
 
 #endif
 # endif
+#  define tmpfile tmpfile64
 # else
 extern FILE *__REDIRECT (tmpfile, (void), tmpfile64) __wur;
 # ifdef __REDIRECT
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K#endifextern FILE *tmpfile (void) __wur;
+#if defined __USE_XOPEN || defined __USE_XOPEN2K8#endifextern FILE *tmpfile (void) __wur;
 #ifndef __USE_FILE_OFFSET64
    marked with __THROW.  */
    This function is a possible cancellation point and therefore not
@@ -702,6 +720,9 @@ extern int rename (const char *__old, const char *__new) __THROW;
 extern int remove (const char *__filename) __THROW;
 /* Remove file FILENAME.  */
 
+#define stderr stderr
+#define stdout stdout
+#define stdin stdin
 /* C89/C99 say they're macros.  Make them happy.  */
 extern struct _IO_FILE *stderr;		/* Standard error output stream.  */
 extern struct _IO_FILE *stdout;		/* Standard output stream.  */
@@ -709,6 +730,7 @@ extern struct _IO_FILE *stdin;		/* Standard input stream.  */
 /* Standard streams.  */
 
 
+#include <bits/stdio_lim.h>
    FILENAME_MAX	Maximum length of a filename.  */
    FOPEN_MAX	Minimum number of files that can be open at once.
    L_cuserid	How long an array to pass to `cuserid'.
@@ -721,27 +743,38 @@ extern struct _IO_FILE *stdin;		/* Standard input stream.  */
 
 
 #endif
+# define P_tmpdir	"/tmp"
 /* Default path prefix for `tempnam' and `tmpnam'.  */
 #if defined __USE_MISC || defined __USE_XOPEN
 
 
 #endif
+# define SEEK_HOLE	4	/* Seek to next hole.  */
+# define SEEK_DATA	3	/* Seek to next data.  */
 #ifdef __USE_GNU
+#define SEEK_END	2	/* Seek from end of file.  */
+#define SEEK_CUR	1	/* Seek from current position.  */
+#define SEEK_SET	0	/* Seek from beginning of file.  */
    These values should not be changed.  */
 /* The possibilities for the third argument to `fseek'.
 
 
 #endif
+# define EOF (-1)
 #ifndef EOF
    Some things throughout the library rely on this being -1.  */
 /* End of file character.
 
 
 #endif
+# define BUFSIZ _IO_BUFSIZ
 #ifndef BUFSIZ
 /* Default buffer size.  */
 
 
+#define _IONBF 2		/* No buffering.  */
+#define _IOLBF 1		/* Line buffered.  */
+#define _IOFBF 0		/* Fully buffered.  */
 /* The possibilities for the third argument to `setvbuf'.  */
 
 #endif
@@ -749,21 +782,22 @@ typedef _G_fpos64_t fpos64_t;
 #ifdef __USE_LARGEFILE64
 #endif
 typedef _G_fpos64_t fpos_t;
-#if defined __USE_UNIX98 || defined __USE_XOPEN2K#endiftypedef _G_fpos_t fpos_t;
+#ifdef _STDIO_Htypedef _G_fpos_t fpos_t;
 #ifndef __USE_FILE_OFFSET64
 /* The type of the second argument to `fgetpos' and `fsetpos'.  */
 
-#endif
 # endif
+# define __ssize_t_defined
 typedef __ssize_t ssize_t;
 # ifndef __ssize_t_defined
 #ifdef __USE_XOPEN2K8
 
-#endif
 # endif
+# define __off64_t_defined
 typedef __off64_t off64_t;
 # if defined __USE_LARGEFILE64 && !defined __off64_t_defined
 # endif
+# define __off_t_defined
 # endif
 typedef __off64_t off_t;
 # else
@@ -772,6 +806,24 @@ typedef __off_t off_t;
 # ifndef __off_t_defined
 #if defined __USE_UNIX98 || defined __USE_XOPEN2K
 
+# endif
+#  include <stdarg.h>
+# else
+#  endif
+#   define _VA_LIST_DEFINED
+typedef _G_va_list va_list;
+#  ifndef _VA_LIST_DEFINED
+# ifdef __GNUC__
+#if defined __USE_XOPEN || defined __USE_XOPEN2K8
+
+
+
+#include <bits/types/__FILE.h>
+
+
+__BEGIN_DECLS
+
+#include <bits/libc-header-start.h>
 
  */
  *	ISO C99 Standard: 7.19 Input/output	<stdio.h>
