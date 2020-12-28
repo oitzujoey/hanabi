@@ -92,7 +92,7 @@ def layer(depth,dataset=dataset,layers=0):
             end = d
             in_l -= 1
             if in_l == 0 and start < end:
-                dataset.append("push c")
+                #dataset.append("push c")
                 internal_layers += 1
                 layer(depth=depth[start:end],dataset=dataset,layers=internal_layers)
                 depth = depth[0:start-1] + 'link' + str(len(dataset)) + depth[end+1:]
@@ -111,8 +111,8 @@ def layer(depth,dataset=dataset,layers=0):
 
     dataset.append(' '.join(d_spac))
 
-    for t in range(internal_layers - layers):
-        dataset.append('pull c')
+    #for t in range(internal_layers - layers):
+    #    dataset.append('pull c')
 
 layer(depth=depth,dataset=dataset)
 pprint.pprint(dataset)
