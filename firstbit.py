@@ -1,65 +1,15 @@
 import pprint
 
-nook = []
-context = ""
+code = """
 
-data = """
-nook msg "Testing this out"
-nook x
+nook x 1
 spot
-    1 +
-    leaveon 10
-    back
-say
-"""
+    + x 1
+    hopsame outspot x 10
+back
+spot outspot
 
 """
-dataset = []
-
-# Parse through code
-def parse(d, dataset=dataset):
-    cmd = []
-    d = d.strip()
-
-    is_data = False
-    f = 0
-    t = 0
-    dn = 0
-    rr = len(d)
-    while dn < rr:
-        dd = d[dn]
-        t += 1
-
-        if dd in ['"']:
-            is_data = not is_data
-
-        if not is_data:
-            if dd in ["("]:
-                end_loc = d.find(")",dn)
-                ds = d[dn+1:end_loc]
-                dataset.append(parse(ds))
-                d = d[:dn] + (d[end_loc+2:] if end_loc < len(d) else [])
-
-            elif dd in [' ']:
-                cmd.append(d[f:t-1])
-                f = t
-
-            elif t == len(d):
-                cmd.append(d[f:t])
-
-        dn += 1
-        rr = len(d)
-    return cmd
-
-for d in data.split('\n'):
-    cmd = parse(d)
-    if cmd != []:
-        dataset.append(cmd)
-
-pprint.pprint(dataset)
-"""
-
-depth = "12 (+ 5 (+ 6 (3)) 2) 1 6 (7 (9))"
 
 def valuify(value):
     if value.isnumeric():
@@ -67,71 +17,99 @@ def valuify(value):
     else:
         return value
 
-dataset = []
-command = ['+', '-', 'nook']
-nooks = ['x']
+# NOOK      determines memory location
+# SPOT      determines loop back point
+# MEMORY    determines where in memory a thing is
+# HOPSAME   if the same, go to location
+# HOPMORE   if more, go to location
+# HOPLESS   if less, go to location
+# SETSAME   if the same, set context
+# SETMORE   if more, set context
+# SETLESS   if less, set context
 
-def layer(depth,dataset=dataset,layers=0):
-    start = 0
-    end = 0
-    in_l = 0
+dataset = []
+command = [
+    '+',
+    '-',
+    '=',
+    '*',
+    '%',
+    '/',
+    'nook',
+    'spot',
+    'back',
+    'pocket',
+    'hop',
+    'hopsame']
+
+nooks = []
+nook_count = 0
+
+def split_complex(base_cmd):
+    global nook_count
+
+    if base_cmd[0] not in command:
+        base_cmd = ["="] + base_cmd
+    
+    if base_cmd[0] in command:
+        if len(base_cmd) > 1:
+            if base_cmd[0] == "nook":
+                nooks.append(base_cmd[1])
+
+            if base_cmd[1] not in nooks and base_cmd[1].isnumeric():
+                dataset.append(["nook", "t" + str(nook_count)])
+                base_cmd.insert(1,"t"+str(nook_count))
+                nooks.append("t"+str(nook_count))
+                nook_count += 1
+
+    return base_cmd
+
+def layer(depth,layers=0):
+    global dataset
+
+    spa = ''.join(['\t' for t in range(layers)])
+
+    paren_layer = 0
     internal_layers = layers
 
-    # Handle recursion in parenthesis
     d = 0
     length = len(depth)
+    base_cmd = []
     while d < length:
         char = depth[d]
+        #print(spa + char + '\t\t' + str(paren_layer))
+        
+        if char == " " and paren_layer == 0:
+            base_cmd.append(depth[:d])
+            depth = depth[d+1:]
+            #print(spa + "Depth: $" + depth + "$")
+            d = 0
 
         if char == "(":
-            if in_l == 0:
-                start = d + 1
-            in_l += 1
+
+            paren_layer += 1
 
         elif char == ")":
-            end = d
-            in_l -= 1
-            if in_l == 0 and start < end:
-                #dataset.append("push c")
+            paren_layer -= 1
+            if paren_layer == 0:
                 internal_layers += 1
-                layer(depth=depth[start:end],dataset=dataset,layers=internal_layers)
-                depth = depth[0:start-1] + 'link' + str(len(dataset)) + depth[end+1:]
-                end = start
-                d = start
+                #print(spa + "Running: $" + str(depth[2:d]) + "$")
+                layer(depth=depth[2:d],layers=internal_layers)
+                depth = dataset[-1][1] + depth[d+1:]
+                d = 0
 
         d += 1
         length = len(depth)
+    base_cmd.append(depth)
 
-    d_spac = depth.split(' ')
+    base_cmd = split_complex(base_cmd)
+    #print(spa + str(base_cmd))
+    dataset.append(base_cmd)
 
-    if d_spac[0] not in command:
-        d_spac.insert(0,"+")
-    if d_spac[1] not in nook:
-        d_spac.insert(1,"c")
+for c in code.split('\n'):
+    c = c.strip()
+    if c != "":
+        layer(depth=c)
 
-    dataset.append(' '.join(d_spac))
-
-    #for t in range(internal_layers - layers):
-    #    dataset.append('pull c')
-
-layer(depth=depth,dataset=dataset)
+#print('\n\n')
 pprint.pprint(dataset)
-
-"""
-    # Handle actual calculations
-    values = []
-    d = 0
-    length = len(depth)
-
-    while d < length:
-        char = depth[d]
-        if char == " ":
-            values.append(valuify(depth[0:d]))
-            depth = depth[d+1:]
-
-        d += 1
-        length = len(depth)
-
-    values.append(valuify(depth))
-    return str(values[0])
-"""
