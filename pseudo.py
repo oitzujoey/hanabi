@@ -24,7 +24,8 @@ command = [
     'pocket',
     'hop',
     'say',
-    'friend']
+    'friend',
+    'memory']
 
 nooks = []
 nook_count = 0
@@ -53,7 +54,9 @@ def split_complex(base_cmd,header=None):
 
         if len(base_cmd) > 1:
             if base_cmd[0] == "nook":
-                if base_cmd[1] not in ['string', 'int', 'float', 'double','char','unsignedchar','signedchar','unsignedint','short','unsignedshort','long','unsignedlong']:
+                if len(base_cmd) == 2:
+                    base_cmd.append('0')
+                if base_cmd[1] not in ['string', 'memory', 'accumulator', 'int', 'float', 'double','char','unsignedchar','signedchar','unsignedint','short','unsignedshort','long','unsignedlong']:
                     if base_cmd[2][0] == "\"":
                         base_cmd.insert(1,"string")
                     else:
@@ -63,7 +66,7 @@ def split_complex(base_cmd,header=None):
                 if header != None:
                     base_cmd[2] = header + '_' + base_cmd[2]
 
-            if base_cmd[0] == "friend":
+            elif base_cmd[0] == "friend":
                 with open(base_cmd[1],'r') as f:
                     d = pseudo(f.readlines(),header=base_cmd[1][:base_cmd[1].find('.')])
                     pprint.pprint(d)
@@ -74,6 +77,9 @@ def split_complex(base_cmd,header=None):
                 if base_cmd[1] not in ['=','<','>','<=','>=','!=']:
                     base_cmd.insert(1,'=')
             
+            elif base_cmd[0] == "memory":
+                pass
+
             else:
                 if base_cmd[1] not in nooks and base_cmd[1].isnumeric():
                     dataset.append(["nook", "int", "t" + str(nook_count)])

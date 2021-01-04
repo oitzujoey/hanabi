@@ -1,0 +1,12 @@
+
+; this is a test
+; memory 512 1
+; memory 513 5
+; memory 514 8
+
+nook memory first 5
+nook accumulator a
+
+= a 80
+= first a
++ a first
