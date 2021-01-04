@@ -23,7 +23,8 @@ command = [
     'back',
     'pocket',
     'hop',
-    'say']
+    'say',
+    'friend']
 
 nooks = []
 nook_count = 0
@@ -35,24 +36,39 @@ def valuify(value):
     else:
         return value
 
-def split_complex(base_cmd):
+def split_complex(base_cmd,header=None):
     global nook_count
     global spot_count
     global dataset
+    global nooks
 
     if base_cmd[0] not in command:
         base_cmd = ["="] + base_cmd
     
     if base_cmd[0] in command:
+        if header != None:
+            for b in range(len(base_cmd)):
+                if base_cmd[b] in nooks:
+                    base_cmd[b] = header + '_' + base_cmd[b]
+
         if len(base_cmd) > 1:
             if base_cmd[0] == "nook":
-                nooks.append(base_cmd[1])
                 if base_cmd[1] not in ['string', 'int', 'float', 'double','char','unsignedchar','signedchar','unsignedint','short','unsignedshort','long','unsignedlong']:
                     if base_cmd[2][0] == "\"":
                         base_cmd.insert(1,"string")
                     else:
-                        print(base_cmd[1][0])
                         base_cmd.insert(1,"int")
+                if base_cmd[2] in nooks: dataset.append(['trash',base_cmd[2]])
+                nooks.append(base_cmd[2])
+                if header != None:
+                    base_cmd[2] = header + '_' + base_cmd[2]
+
+            if base_cmd[0] == "friend":
+                with open(base_cmd[1],'r') as f:
+                    d = pseudo(f.readlines(),header=base_cmd[1][:base_cmd[1].find('.')])
+                    pprint.pprint(d)
+                    dataset.append(d)
+                return None
 
             elif base_cmd[0] == "hop":
                 if base_cmd[1] not in ['=','<','>','<=','>=','!=']:
@@ -80,7 +96,7 @@ def split_complex(base_cmd):
 
     return base_cmd
 
-def layer(depth,layers=0):
+def layer(depth,layers=0,header=None):
     global dataset
 
     spa = ''.join(['\t' for t in range(layers)])
@@ -132,11 +148,12 @@ def layer(depth,layers=0):
 
         if len(depth) > 0:
             base_cmd.append(depth)
-        base_cmd = split_complex(base_cmd)
+        base_cmd = split_complex(base_cmd,header=header)
         #print(spa + str(base_cmd))
-        dataset.append(base_cmd)
+        if base_cmd is not None:
+            dataset.append(base_cmd)
 
-def pseudo(code):
+def pseudo(code,header=None):
     global dataset
 
     for c in code:
@@ -144,6 +161,6 @@ def pseudo(code):
             c = c[:c.find(';')]
         c = c.strip()
         if c != "":
-            layer(depth=c)
+            layer(depth=c,header=header)
     
     return dataset

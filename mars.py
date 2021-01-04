@@ -31,19 +31,12 @@ memory_map = {}
 var_start = {}
 var_end = {}
 
-def predict(var,loc):
-    global vars
-    global reg_count
+def garbage_collection(var):
+    memory[memory_map[var]] = None
+    del memory_map[var]
+    registers[find_register(var)] = None
 
-    upper = loc + reg_count
-    if upper > len(vars): upper = len(vars)
-
-    for s in range(loc,upper):
-        if vars[s][1] == var:
-            return True
-    return False
-
-def relevant(var, loc=len(vars)):
+def relevant(var, loc=0):
     global vars
     global reg_count
 
@@ -112,10 +105,10 @@ pprint.pprint(vars)
 def ret(t):
     return register_mask[find_register(spot[t])]
 
-t1 = ''
-t2 = ''
-t3 = ''
-t4 = ''
+tt = {}
+for i in range(10):
+    tt[i] = ''
+
 data_section = []
 comm_section = []
 for v in range(len(vars)):
@@ -124,13 +117,13 @@ for v in range(len(vars)):
     mark_var = False
 
     if spots > 1:
-        t1 = find_register(spot[1])
+        tt[1] = find_register(spot[1])
         if spots > 2:
-            t2 = find_register(spot[2])
+            tt[2] = find_register(spot[2])
             if spots > 3:
-                t3 = find_register(spot[3])
+                tt[3] = find_register(spot[3])
                 if spots > 4:
-                    t4 = find_register(spot[4])
+                    tt[4] = find_register(spot[4])
 
     if spot[0] == "nook":
         if spot[1] == "string":
@@ -187,22 +180,24 @@ for v in range(len(vars)):
             comm_section.append('')
 
     elif spot[0] == "+":
-        if t1 != None and t2 != None and t3 != None:
+        if tt[1] != None and tt[2] != None and tt[3] != None:
             comm_section.append("add\t" + ret(1)+ cm + ret(2) + cm + register_mask[find_register(spot[3])])
-        elif t3 == None:
+        elif tt[3] == None:
             comm_section.append(addi + ret(1) + cm + ret(2) + cm + spot[3])
 
     elif spot[0] == "-":
-        if t1 != None and t2 != None and t3 != None:
+        if tt[1] != None and tt[2] != None and tt[3] != None:
             comm_section.append("sub\t" + ret(1)+ cm + ret(2) + cm + register_mask[find_register(spot[3])])
-        elif t3 == None:
+        elif tt[3] == None:
             comm_section.append(addi + ret(1) + cm + ret(2) + ", -" + spot[3])
 
     elif spot[0] == "=":
-        if t3 == None:
+        if tt[3] == None:
             comm_section.append(addi + ret(1) + ", $zero, " + spot[3])
         else:
             comm_section.append("add\t" + ret(1) + cm + ret(2) + ", $zero")
+
+pprint.pprint(vars_type)
 
 if len(data_section) > 0:
     print('.data')
