@@ -7,11 +7,38 @@ import os
 memory_map = {}
 acc_nook = ''
 x_nook = ''
+y_nook = ''
 nooks = []
 vars_type = {}
+spot_count = 0
+using = {
+    'A': False,
+    'X': False,
+    'Y': False
+}
 
 def hc(t=0):
     return '0' + str(hex(int(t)))[2:]
+
+def ip(val):
+    if val == acc_nook:
+        using['A'] = True
+        return 'A'
+    if val == x_nook:
+        using['X'] = True
+        return 'X'
+    if val == y_nook:
+        using['Y'] = True
+        return 'Y'
+
+def identify(cmd=[],val=[]):
+    for u in using.keys(): using[u] = False
+    for v in val:
+        if len(cmd) >= v:
+            ip(cmd[v])
+
+def alloc(val):
+    s = [u for u in using.keys() if using[u] == False][0]
 
 #################################################
 
@@ -24,6 +51,7 @@ pprint.pprint(vars)
 data_section = []
 comm_section = []
 for v in range(len(vars)):
+
     spot = vars[v]
     spots = len(spot)
     mark_var = False
@@ -33,17 +61,34 @@ for v in range(len(vars)):
         comm_section.append('STA\t' + '$' + hc(spot[1]))
 
     elif spot[0] == "nook":
+
         if spot[1] == "accumulator":
             vars_type[spot[2]] = "a"
+            if len(spot) == 4:
+                comm_section.append('LDA\t' + '#$' + hc(spot[3]))
         elif spot[1] == "memory":
             vars_type[spot[2]] = "memory"
             memory_map[spot[2]] = int(spot[3])
         else:
             if spot[2] not in nooks:
                 nooks.append(spot[2])
-            acc_nook = spot[2]
+            x_nook = spot[2]
             vars_type[spot[2]] = "int"
-            comm_section.append('LDA\t' + '#$' + hc(spot[3]))
+            comm_section.append('LDX\t' + '#$' + hc(spot[3]))
+
+    elif spot[0] == "spot":
+        comm_section.append('')
+        if len(spot) > 1:
+            comm_section.append(spot[1] + ':')
+        else:
+            comm_section.append("spot" + str(spot_count) + ':')
+            spot_count += 1
+
+    elif spot[0] == "hop":
+        identify(cmd=spot, val=[3,4])
+        if spot[1] == "=":
+            comm_section.append('CPX\t' + '#$' + hc(spot[4]))
+            comm_section.append('BNE\t' + spot[2])
 
     elif spot[0] == "+":
         if vars_type[spot[2]] == "a":
@@ -80,11 +125,15 @@ for v in range(len(vars)):
             f = (pre + t1 + t2).strip()
             comm_section.append(f)
         elif vars_type[spot[2]] == "memory":
-            if vars_type[spot[3]] != "a":
+            if vars_type[spot[3]] == "a":
+                pass
+            elif vars_type[spot[3]] == "int":
+                comm_section.append('STX\t' + '$' + hc(memory_map[spot[2]]))
+            else:
                 if acc_nook != spot[2]:
                     comm_section.append('LDA\t' + '#$' + hc(spot[3]))
                     acc_nook = spot[2]
-            comm_section.append('STA\t' + '$' + hc(memory_map[spot[2]]))
+                comm_section.append('STA\t' + '$' + hc(memory_map[spot[2]]))
 
 comm_section.append('BRK')
 

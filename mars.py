@@ -96,7 +96,7 @@ def twos(val_str, bytes):
 
 ########################################################
 
-with open('example.hana') as f:
+with open('hshc.hana') as f:
     vars = pseudo.pseudo(f.readlines())
 
 final = []
@@ -195,7 +195,7 @@ for v in range(len(vars)):
         if tt[3] == None:
             comm_section.append(addi + ret(1) + ", $zero, " + spot[3])
         else:
-            comm_section.append("add\t" + ret(1) + cm + ret(2) + ", $zero")
+            comm_section.append("add\t" + ret(2) + cm + ret(3) + ", $zero")
 
 pprint.pprint(vars_type)
 
