@@ -66,6 +66,7 @@ for v in range(len(vars)):
             vars_type[spot[2]] = "a"
             if len(spot) == 4:
                 comm_section.append('LDA\t' + '#$' + hc(spot[3]))
+            acc_nook = spot[2]
         elif spot[1] == "memory":
             vars_type[spot[2]] = "memory"
             memory_map[spot[2]] = int(spot[3])
@@ -85,10 +86,15 @@ for v in range(len(vars)):
             spot_count += 1
 
     elif spot[0] == "hop":
-        identify(cmd=spot, val=[3,4])
-        if spot[1] == "=":
-            comm_section.append('CPX\t' + '#$' + hc(spot[4]))
-            comm_section.append('BNE\t' + spot[2])
+        if len(spot) == 2:
+            if spot[1][0] != '(': spot[1] = '(' + spot[1] + ')'
+            comm_section.append('JMP\t' + spot[1])
+        else:
+            identify(cmd=spot, val=[3,4])
+            if spot[1] == "!=":
+                u = [u for u in using.keys() if using[u]][0]
+                comm_section.append('CP' + u + '\t' + '#$' + hc(spot[4]))
+                comm_section.append('BNE\t' + spot[2])
 
     elif spot[0] == "+":
         if vars_type[spot[2]] == "a":
@@ -126,6 +132,7 @@ for v in range(len(vars)):
             comm_section.append(f)
         elif vars_type[spot[2]] == "memory":
             if vars_type[spot[3]] == "a":
+                comm_section.append('STA\t' + '$' + hc(memory_map[spot[2]]))
                 pass
             elif vars_type[spot[3]] == "int":
                 comm_section.append('STX\t' + '$' + hc(memory_map[spot[2]]))

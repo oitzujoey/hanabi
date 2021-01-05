@@ -1,12 +1,12 @@
 
 ; 6502 assembly, whoop whoop!
 
-nook memory t 512
-nook memory final 513
-nook counter 1
+; initialize and plan
+nook accumulator value 1
+nook memory thing1 240
+nook memory thing2 241
 
-spot decrement
-    + counter 1
-    = t counter
-    hop decrement t 3
-    = memory x
+= thing1 value
+= value 204
+= thing2 value
+hop $00f0

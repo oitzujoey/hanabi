@@ -74,7 +74,7 @@ def split_complex(base_cmd,header=None):
                 return None
 
             elif base_cmd[0] == "hop":
-                if base_cmd[1] not in ['=','<','>','<=','>=','!=']:
+                if len(base_cmd) > 2 and base_cmd[1] not in ['=','<','>','<=','>=','!=']:
                     base_cmd.insert(1,'=')
             
             elif base_cmd[0] == "memory":
