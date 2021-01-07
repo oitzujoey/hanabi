@@ -1,12 +1,36 @@
 
 ; 6502 assembly, whoop whoop!
 
-; initialize and plan
-nook accumulator value 1
-nook memory thing1 240
-nook memory thing2 241
 
-= thing1 value
-= value 204
-= thing2 value
-hop $00f0
+; Multiply
+
+nook accumulator a 0
+nook x 8
+nook mpr 0
+nook c
+
+spot mult
+    << mpr c
+    hop = c none
+    = a c
+    
+
+spot noadd
+
+
+
+; Hello world, 6502 assembly!
+nook string "Hello, sheep! Hello, cup of tea!"
+nook location 0
+nook acc a
+
+spot loop
+    hop = (+ msg location) 0
+    hop cout
+    + location 1
+    back
+    done
+
+spot cout
+    nook gequ 65005
+    keep HelloWorld
