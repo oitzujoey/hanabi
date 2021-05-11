@@ -1,3 +1,28 @@
 
 There are two functions that this program performs. The first is to interpret Hanabi. The second is to compile Hanabi. There is obviously overlap here. I suspect that the parser will remain the same. Hanabi is unique in that compilation will always call the interpreter for preprocessing. I think that because of this there should only be one executable. Compilation will call the interpreter and then the compiler, while the interpreter will call the interpreter twice.
 We now have two meanings of the word "interpreter". :| Let's call the main program the interpreter because that's what laymen will call it. If you care that much about the distinction between the two terms, then the sub-interpreter will be called the ... subinterpreter!
+
+An important part of this language will be C interoperability. One way I could achieve this is to take the Lua approach. Make C do all the work. When C wants to call a Hanabi function, it calls it using the Hanabi API. When Hanabi needs to call C, C registers a function (callback) with Hanabi, and Hanabi can call it after it is registered. Pretty much an associative array. A second way I could achieve this is to make Hanabi do all the work. This seems like it could be a neater solution. C calls Hanabi functions just like C functions because Hanabi functions *are* C functions on the object code level.
+I think I like the second option for the compiler, but the first option works well for the interpreter. Now I have to learn about object code. :|
+
+I think I will try to do both. :(
+
+There will be two executables and one library. Like Lua, the executables will be a convenient interface for the library. The library will do all the work of interpretation and compilation.
+
+binaries
+	chanabi.x86_64
+	chanabi-compile.x86_64
+	libchanabi.so
+
+Usage:
+	chanabi [options] file arguments
+	chanabi-compile [options] output files
+	gcc -lhanabi
+
+I think I should start with the interpreter. Seems easier. I'll add compiler once I understand how the interpreter is going to work.
+
+C will call interpreted Hanabi using a library API.
+Interpreted Hanabi will call C using a library API controlled by C.
+C will call compiled Hanabi through shared libraries.
+Compiled Hanabi will call C through shared libraries.
+C and compiled Hanabi can only use heterogeneous static libraries if both are frontends to the same compiler. This will likely be GCC or LLVM.

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(chanabi
         VERSION 0
-        DESCRIPTION "C version of Hanabi"
+        DESCRIPTION "C implementation of Hanabi"
         HOMEPAGE_URL https://github.com/oitzujoey/engine-1
         LANGUAGES C)
 
@@ -18,6 +18,7 @@ endif()
 add_compile_options(-DLINUX)
 
 add_executable(chanabi)
+add_executable(chanabi-compile)
 
 # target_compile_options(chanabi PRIVATE -DSOMETHING)
 
@@ -26,3 +27,4 @@ add_executable(chanabi)
 add_subdirectory(source)
 
 target_link_libraries(chanabi)
+target_link_libraries(chanabi-compile)
