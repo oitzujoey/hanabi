@@ -1,0 +1,3 @@
+
+There are two functions that this program performs. The first is to interpret Hanabi. The second is to compile Hanabi. There is obviously overlap here. I suspect that the parser will remain the same. Hanabi is unique in that compilation will always call the interpreter for preprocessing. I think that because of this there should only be one executable. Compilation will call the interpreter and then the compiler, while the interpreter will call the interpreter twice.
+We now have two meanings of the word "interpreter". :| Let's call the main program the interpreter because that's what laymen will call it. If you care that much about the distinction between the two terms, then the sub-interpreter will be called the ... subinterpreter!
