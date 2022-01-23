@@ -403,3 +403,90 @@ Creates an anonymous function. Keep in mind that anonymous functions are still s
 ```
 
 Lambda definition will change after it is determined how function types are specified.
+
+### `and`
+
+`and &rest args`
+
+ANDs multiple expressions together. Short circuits. Returns true with no arguments.
+
+`and` accepts two arguments by default.
+
+### `or`
+
+`or &rest args`
+
+ORs multiple expressions together. Short circuits. Returns false with no arguments.
+
+`or` accepts two arguments by default.
+
+### `xor`
+
+`xor arg &rest args`
+
+XORs multiple expressions together. Short circuits.
+
+`xor` accepts two arguments by default.
+
+### `not`
+
+`not arg`
+
+Inverts the argument.
+
+`not` accepts one argument.
+
+### `not`
+
+`pointer type`
+
+Returns a pointer prototype formed from the given type.
+
+`pointer` accepts one argument.
+
+### `struct`
+
+`struct &rest`
+
+Returns a struct prototype formed from its arguments. Even arguments are member names, and odd arguments are types. If the last argument is odd, then that argument is interpreted as an anonymous member. The argument is the member type.
+
+`struct` accepts 0 arguments by default.
+
+```lisp
+(struct
+  length size_t
+  memory-size size_t
+              (pointer char))  // Anonymous member. Type is (char *).
+```
+
+
+### `union`
+
+`union &rest`
+
+Returns a union prototype formed from its arguments. Even arguments are member names, and odd arguments are types. If the last argument is odd, then that argument is interpreted as an anonymous member. The argument is the member type.
+
+`union` accepts 0 arguments by default.
+
+```lisp
+(union
+  as-pointer (pointer char)
+  as-long    long
+             double)  // Anonymous member. Type is double.
+```
+
+### `addr-of`
+
+`addr-of object`
+
+Pointer reference. Returns the address of the given object.
+
+`addr-of` accepts 1 argument.
+
+### `object-at`
+
+`object-at address`
+
+Pointer dereference. Returns the object pointed to by the given address.
+
+`object-at` accepts 1 argument.
